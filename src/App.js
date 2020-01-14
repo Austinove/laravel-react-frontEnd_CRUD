@@ -1,26 +1,36 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {Component} from 'react';
 import './App.css';
+import { Provider } from "react-redux";
+import { Route, Switch } from "react-router"
+import { ConnectedRouter } from "connected-react-router";
+import store, { history } from "./store"
+import './index.css';
+// import {BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import {Container} from "semantic-ui-react"
+import Login from "./container/login";
+import Post from "./container/post";
+import Navebar from "./navbar";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+
+class App extends Component {
+ 
+  render(){
+    
+      return (
+        <Container>
+          <br/>
+          <Provider store={store}>
+            <ConnectedRouter history={history}>
+              <Navebar/>
+              <Switch>
+                <Route exact path="/" component={Post}/>
+                <Route path="/login" component={Login} />
+              </Switch>
+            </ConnectedRouter>
+          </Provider>
+        </Container>
+      );
+  }
 }
 
 export default App;
