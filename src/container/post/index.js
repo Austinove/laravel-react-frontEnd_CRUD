@@ -8,6 +8,8 @@ import {
     TextArea,
     Segment,
 } from 'semantic-ui-react'
+import MyImage from "./image";
+import {BASE_URL} from "../../constants"
 import { fetchRequest, createRequest, removeRequest, updateRequest} from "../../actions/post"
 class post extends Component {
     constructor(props) {
@@ -16,91 +18,138 @@ class post extends Component {
             title: "",
             body: "",
             isLoading: "",
-            postData: ""
+            postData: "",
+            filename: ""
         }
         this.handleChange = this.handleChange.bind()
     }
 
     componentDidMount(){
         this.props.fetchRequest();
-        this.getData();
     }
 
-    getData=()=>{
-        this.setState({
-            ... this.state,
-            postData: this.props.postData
-        })
+    static getDerivedStateFromProps(nextProps, prevState){
+        if(nextProps.postData!==prevState.postData){
+            return {
+                postData: nextProps.postData,
+                isLoading: nextProps.isLoading
+            };
+        }
+        return null;
     }
-    handleChange = (e, data ) => {
+
+    handleFile=(e)=>{ 
         this.setState({
             ...this.state,
-            [data.name]: data.value
+            filename:e.target.files[0]
+        })
+    }
+    handleChange = (e) => {
+        this.setState({
+            ...this.state,
+            [e.target.name]: e.target.value
         });
     }
 
     submitPost=()=>{
-        const postData = {
-            "title": this.state.title,
-            "body": this.state.body
-        }
+        console.log('file', this.state.filename);
+        const postData = new FormData();
+        postData.append("title", this.state.title)
+        postData.append("body", this.state.body)
+        postData.append("image", this.state.filename)
         this.props.createRequest(postData);
         
     }
+    // deletePost=(id)=>{
+    //     this.props.removeRequest(id)
+    // }
 
     render() {
         return (
             <div>
-                <Segment>
-                    <Form>
-                        <Form.Field
-                            name="title"
-                            control={Input}
-                            label='Title'
-                            placeholder='User Name'
-                            onChange={this.handleChange}
-                        />
-                        {/* <label>Post Picture</label> */}
-                        {/* <input type="file"/> */}
-                        <Form.Field
-                            name="body"
-                            control={TextArea}
-                            label='Your Post'
-                            placeholder='Tell us more about you...'
-                            onChange={this.handleChange}
-                        />
-                        <Form.Field control={Button} onClick={this.submitPost}>Submit</Form.Field>
-                    </Form>
-                </Segment>
-                <br/>
-                <Item.Group>
-                    <Item>
-                        <Item.Image size='tiny' src='/images/wireframe/image.png' />
+                <div class="columns">
+                    <div class="column is-two-fifths">
+                        <section class="section">
+                            <div className="container">
+                                <Form>
+                                    <div className="field">
+                                        <label className="label">Title</label>
+                                        <div className="control">
+                                            <input className="input"
+                                            name="title"
+                                            type="text" 
+                                            placeholder="Enter Title" 
+                                            onChange={this.handleChange} />
+                                        </div>
+                                    </div>
 
-                        <Item.Content>
-                            <Item.Header as='a'>Header</Item.Header>
-                            <Item.Meta>Description</Item.Meta>
-                            <Item.Description>
-                                asdfasdggegweagr
-                            </Item.Description>
-                            <Item.Extra>Additional Details</Item.Extra>
-                        </Item.Content>
-                    </Item>
+                                    <div className="field">
+                                        <label className="label">Body</label>
+                                        <div className="control">
+                                            <textarea className="textarea" 
+                                            type="text"
+                                            name="body" 
+                                            placeholder="Enter Body of Post" 
+                                            onChange={this.handleChange} />
+                                        </div>
+                                    </div>
 
-                    <Item>
-                        <Item.Image size='tiny' src='/images/wireframe/image.png' />
-
-                        <Item.Content>
-                            <Item.Header as='a'>Header</Item.Header>
-                            <Item.Meta>Description</Item.Meta>
-                            <Item.Description>
-                                sgaewgadsaefweagea
-                            </Item.Description>
-                            <Item.Extra>Additional Details</Item.Extra>
-                        </Item.Content>
-                    </Item>
-                </Item.Group>
+                                    <div class="field">
+                                        <input type="file" name="filename" onChange={this.handleFile}/>
+                                    </div>
+                                    <Form.Field control={Button} onClick={this.submitPost}>Submit</Form.Field>
+                                </Form>
+                            </div>
+                        </section>
+                    </div>
+                <div class="column">
+                    <br/>
+                    {this.state.postData.map((_post, index)=>{
+                        return(
+                            <article className="media" key={index}>
+                                <figure className="media-left">
+                                    <p className="image is-64x64">
+                                        <MyImage image={{
+                                            src: `${BASE_URL}/storage/post_images/${_post.image}`,
+                                            alt:"My image"
+                                        }}
+                                            />
+                                    </p>
+                                </figure>
+                                <div className="media-content">
+                                    <div className="content">
+                                    <p>
+                                        <strong>John Smith </strong><small>{_post.created_at}</small>
+                                        <br/>
+                                            <strong>{_post.title}</strong>
+                                        <br/>
+                                        {_post.body}
+                                    </p>
+                                    </div>
+                                    <nav className="level is-mobile">
+                                    <div className="level-left">
+                                        <a className="level-item">
+                                        <span className="icon is-small"><i className="fas fa-reply"></i></span>
+                                        </a>
+                                        <a className="level-item">
+                                        <span className="icon is-small"><i className="fas fa-retweet"></i></span>
+                                        </a>
+                                        <a className="level-item">
+                                        <span className="icon is-small"><i className="fas fa-heart"></i></span>
+                                        </a>
+                                    </div>
+                                    </nav>
+                                </div>
+                                <div className="media-right">
+                                    <button className="delete"></button>
+                                </div>
+                            </article>
+                        )
+                    })}
+                    </div>
+                </div>
             </div>
+            
         )
     }
 }

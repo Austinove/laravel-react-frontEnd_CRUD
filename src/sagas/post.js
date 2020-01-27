@@ -50,19 +50,18 @@ function* removePosts({payload}) {
     }
 }
 function* createPosts({payload}) {
-    // const {title, post} = payload
     try {
-        const response = yield call(fetch, `${BASE_URL}/api/`, {
+        const response = yield call(fetch, `${BASE_URL}/api/posts/store`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                // "Content-Type": "application/json"
             },
-            body: JSON.stringify(payload)
+            body: payload
         });
         if(!response){
             throw new Error("No list found")
         }
-        const postData = response.json();
+        const postData = yield response.json();
         yield put(createSuccess(postData))
 
     } catch (error) {
@@ -72,10 +71,9 @@ function* createPosts({payload}) {
 }
 function* fetchPosts() {
     const Posts = "reached saga"; 
-    // `${BASE_URL}/api/findEvent/${id}`
     try {
         const postsFetch = yield call(fetch, `${BASE_URL}/api/posts`);
-        const Posts = postsFetch.json();
+        const Posts = yield postsFetch.json();
         yield put(fetchSuccess(Posts));
     } catch (e) {
         console.log("Error from server -> ",e)
